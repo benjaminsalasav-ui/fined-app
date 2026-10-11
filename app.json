@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "FinEdApp",
+    "slug": "finedapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.finedapp.app"
+    },
+    "android": {
+      "package": "com.finedapp.app"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
