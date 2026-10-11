@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AuthContext } from '../context/AuthContext';
 
 export default function LoginScreen({ navigation }) {
-  const { signIn } = useContext(AuthContext);
+  const { signIn, signInAsGuest } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -70,6 +70,10 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.linkText}>¿No tienes cuenta? </Text>
             <Text style={styles.linkBold}>Regístrate</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={signInAsGuest} style={styles.guestButton}>
+            <Text style={styles.guestText}>Probar sin cuenta</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -99,6 +103,11 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
   linkRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
+  guestButton: {
+    marginTop: 16, paddingVertical: 14, borderRadius: 14, alignItems: 'center',
+    borderWidth: 1.5, borderColor: '#1a237e',
+  },
+  guestText: { color: '#1a237e', fontWeight: 'bold', fontSize: 16 },
   linkText: { color: '#616161', fontSize: 14 },
   linkBold: { color: '#1a237e', fontWeight: 'bold', fontSize: 14 },
 });

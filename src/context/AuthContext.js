@@ -22,6 +22,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState({ onboardingDone: false, level: null });
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
     // Sesión inicial al abrir la app.
@@ -44,27 +45,47 @@ export function AuthProvider({ children }) {
 
   const signUp = useCallback((data) => auth.signUp(data), []);
   const signIn = useCallback((data) => auth.signIn(data), []);
-  const signOut = useCallback(() => auth.signOut(), []);
+  // Modo invitado: permite probar la app sin crear cuenta (el progreso no se guarda en el servidor).
+  const signInAsGuest = useCallback(() => {
+    setIsGuest(true);
+    setUser({ id: 'guest', email: '', name: 'Invitado', guest: true });
+    setProfile({ onboardingDone: false, level: null });
+  }, []);
+
+  const signOut = useCallback(() => {
+    if (isGuest) {
+      setIsGuest(false);
+      setUser(null);
+      setProfile({ onboardingDone: false, level: null });
+      return Promise.resolve();
+    }
+    return auth.signOut();
+  }, [isGuest]);
   const resetPassword = useCallback((email) => auth.resetPassword(email), []);
   const resendConfirmation = useCallback((email) => auth.resendConfirmation(email), []);
 
   // Guarda el resultado del quiz de diagnóstico en el perfil (metadatos).
   const completeOnboarding = useCallback(async ({ level, diagnosticScore }) => {
     setProfile((p) => ({ ...p, onboardingDone: true, level, diagnosticScore }));
+    if (isGuest) return;
     await auth.updateProfile({
       onboarding_done: true,
       level,
       diagnostic_score: diagnosticScore,
     });
-  }, []);
+  }, [isGuest]);
 
-  const deleteAccount = useCallback(() => auth.deleteAccount(), []);
-  const getAccountData = useCallback(() => auth.getAccountData(), []);
+  const deleteAccount = useCallback(() => (
+    isGuest
+      ? Promise.resolve({ error: 'Estás en modo invitado: no hay una cuenta que eliminar.' })
+      : auth.deleteAccount()
+  ), [isGuest]);
+  const getAccountData = useCallback(() => (isGuest ? Promise.resolve(null) : auth.getAccountData()), [isGuest]);
 
   return (
     <AuthContext.Provider value={{
-      user, profile, loading,
-      signUp, signIn, signOut, resetPassword, resendConfirmation,
+      user, profile, loading, isGuest,
+      signUp, signIn, signInAsGuest, signOut, resetPassword, resendConfirmation,
       completeOnboarding, deleteAccount, getAccountData,
     }}>
       {children}
